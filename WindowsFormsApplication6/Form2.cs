@@ -20,18 +20,21 @@ namespace WindowsFormsApplication6
         private void btnABook_Click(object sender, EventArgs e)
         {
             AddBook addbook = new AddBook();
+            this.Hide();
             addbook.Show();
         }
 
         private void btnBBook_Click(object sender, EventArgs e)
         {
             Lending obj = new Lending();
+            this.Hide();
             obj.Show();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             AddMember addmember = new AddMember();
+            this.Hide();
             addmember.Show();
         }
 
@@ -48,24 +51,28 @@ namespace WindowsFormsApplication6
         private void button1_Click_1(object sender, EventArgs e)
         {
             EditMember Edit = new EditMember();
+            this.Hide();
             Edit.Show(); 
         }
 
         private void btnShowSIDBOOK_Click(object sender, EventArgs e)
         {
             SearchSIDandShowBOOK obj = new SearchSIDandShowBOOK();
+            this.Hide();
             obj.Show();
         }
 
         private void btnEditBook_Click(object sender, EventArgs e)
         {
             EditBook obj = new EditBook();
+            this.Hide();
             obj.ShowDialog();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             SearchByLanguage obj = new SearchByLanguage();
+            this.Hide();
             obj.Show();
         }
     }

@@ -42,8 +42,8 @@
             set { _Year = value; }
         }
         
-        private int _Telephone;
-        public int Telephone
+        private string _Telephone;
+        public string Telephone
         {
             get { return _Telephone; }
             set { _Telephone = value; }

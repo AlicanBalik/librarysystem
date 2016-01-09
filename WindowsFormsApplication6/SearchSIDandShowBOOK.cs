@@ -17,7 +17,7 @@ namespace WindowsFormsApplication6
         {
             InitializeComponent();
         }
-        SqlConnection Conn;
+
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -37,17 +37,17 @@ namespace WindowsFormsApplication6
         private void btnSearch_Click(object sender, EventArgs e)
         {
             listBox1.Items.Clear();
-            Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
-            SqlCommand com = new SqlCommand("Select StudentID from Members where StudentID like @studentid", Conn);
+
+            SqlCommand com = new SqlCommand(@"Select StudentID from Members where StudentID like @studentid", SQLConnection.Connection);
             com.Parameters.AddWithValue("@studentid", "%" + textBox1.Text + "%");
-            Conn.Open();
+            com.Connection.Open();
             SqlDataReader dr = com.ExecuteReader();
 
             while (dr.Read())
             {
                 listBox1.Items.Add(dr.GetInt32(0).ToString());
             }
-            Conn.Close();
+            SQLConnection.Connection.Close();
 
         }
 
@@ -59,10 +59,10 @@ namespace WindowsFormsApplication6
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             ShowEverything.Items.Clear();
-            Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
-            SqlCommand com = new SqlCommand("Select StudentID,BookID,LendedDate from LendedBOOKS where StudentID=@studentid and IsReturnedBack=0", Conn);
+
+            SqlCommand com = new SqlCommand("Select StudentID,BookID,LendedDate from LendedBOOKS where StudentID=@studentid and IsReturnedBack=0", SQLConnection.Connection);
             com.Parameters.AddWithValue("@studentid", listBox1.SelectedItem.ToString());
-            Conn.Open();
+            com.Connection.Open();
             SqlDataReader dr = com.ExecuteReader();
             while (dr.Read())
             {
@@ -78,7 +78,7 @@ namespace WindowsFormsApplication6
                 }
 
             }
-            Conn.Close();
+            SQLConnection.Connection.Close();
         }
 
         private void chkDelivered_CheckedChanged(object sender, EventArgs e)
@@ -90,11 +90,11 @@ namespace WindowsFormsApplication6
         {
             try
             {
-                Conn = new SqlConnection(@"Data Source = (localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
+               
                 string komut = "SELECT * FROM BooksInfo Where bookISBN = @ID;";
-                SqlCommand kom = new SqlCommand(komut, Conn);
+                SqlCommand kom = new SqlCommand(komut, SQLConnection.Connection);
                 kom.Parameters.AddWithValue("@ID", srchBook.Text);
-                Conn.Open();
+                kom.Connection.Open();
                 SqlDataReader re = kom.ExecuteReader();
                 if (srchBook.Text == "")
                 {
@@ -120,27 +120,28 @@ namespace WindowsFormsApplication6
 
                 MessageBox.Show(ex.Message);
             }
-            finally { Conn.Close(); }
+            finally { SQLConnection.Connection.Close(); }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             try
             {
-                Conn = new SqlConnection(@"Data Source = (localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
+               
                 if (chkDelivered.Checked)
                 {
                     string commString = "UPDATE LendedBOOKS SET IsReturnedBack = 1 WHERE StudentID=@SID AND BookID=@BID;";
-                    SqlCommand comm = new SqlCommand(commString, Conn);
+                    SqlCommand comm = new SqlCommand(commString, SQLConnection.Connection);
                     comm.Parameters.AddWithValue("@SID", listBox1.SelectedItem.ToString());
                     comm.Parameters.AddWithValue("@BID", Convert.ToInt32(ShowEverything.SelectedItems[0].SubItems[1].Text));
-                    Conn.Open();
+                    comm.Connection.Open();
                     int sonuc = comm.ExecuteNonQuery();
                     if (sonuc >= 1)
                     {
                         string comString = "UPDATE BooksInfo SET Quantity = Quantity+1 WHERE BookISBN=@BID";
-                        SqlCommand com = new SqlCommand(comString, Conn);
+                        SqlCommand com = new SqlCommand(comString, SQLConnection.Connection);
                         com.Parameters.AddWithValue("@BID", Convert.ToInt32(ShowEverything.SelectedItems[0].SubItems[1].Text));
+                        com.Connection.Open();
                         com.ExecuteNonQuery();
                         MessageBox.Show("Updated");
                         ShowEverything.Refresh();
@@ -153,12 +154,12 @@ namespace WindowsFormsApplication6
 
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                MessageBox.Show("Please Select a book.");
+                MessageBox.Show(ex.Message);
+                //MessageBox.Show("Please Select a book.");
             }
-            finally { Conn.Close(); }
+            finally { SQLConnection.Connection.Close(); }
         }
 
         private void srchBook_TextChanged(object sender, EventArgs e)
@@ -170,6 +171,13 @@ namespace WindowsFormsApplication6
         {
             srchBook.Clear();
             shwBook.ResetText();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form2 obj = new Form2();
+            this.Hide();
+            obj.ShowDialog();
         }
     }
 }

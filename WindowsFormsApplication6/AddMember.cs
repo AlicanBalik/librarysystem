@@ -21,6 +21,7 @@ namespace WindowsFormsApplication6
         private void btnBack_Click(object sender, EventArgs e)
         {
             Form2 mainmenu = new Form2();
+            this.Hide();
             mainmenu.ShowDialog();
         }
         //resetting all blanks
@@ -33,7 +34,6 @@ namespace WindowsFormsApplication6
             txtSID.Clear();
 
         }
-        SqlConnection Conn;
         private void btnRegister_Click(object sender, EventArgs e)
         {
             if (txtSID.Text!="" && txtEMail.Text != "" && txtName.Text!= "" && txtSurname.Text!="" && txtTelephone.Text!="" && cmbDepartment.SelectedIndex!=-1 && cmbYear.SelectedIndex!=-1)
@@ -43,12 +43,12 @@ namespace WindowsFormsApplication6
                 {
                     try
                     {
-                        Conn = new SqlConnection(@"Data Source = (localdb)\v11.0; Initial Catalog = Library System; Integrated security = true;");
+                       
                         string commString = "ADD_NEW_USER";
-                        SqlCommand comm = new SqlCommand(commString, Conn);
+                        SqlCommand comm = new SqlCommand(commString, SQLConnection.Connection);
                         comm.CommandType = CommandType.StoredProcedure; // // // //
-                        DateTime samed = DateTime.Now;
-                        string gunayH = samed.ToString("dd-MM-yyy HH:mm");
+                        DateTime dTime = DateTime.Now;
+                        string str = dTime.ToString("dd-MM-yyy HH:mm");
                         comm.Parameters.AddWithValue("@SID", txtSID.Text);
                         comm.Parameters.AddWithValue("@Name", txtName.Text);
                         comm.Parameters.AddWithValue("@Surname", txtSurname.Text);
@@ -56,8 +56,8 @@ namespace WindowsFormsApplication6
                         comm.Parameters.AddWithValue("@UnivYear", cmbYear.Text);
                         comm.Parameters.AddWithValue("@Telephone", txtTelephone.Text);
                         comm.Parameters.AddWithValue("@EMail", txtEMail.Text);
-                        comm.Parameters.AddWithValue("@Date", samed);
-                        Conn.Open();
+                        comm.Parameters.AddWithValue("@Date", dTime);
+                        comm.Connection.Open();
                         int result = Convert.ToInt32(comm.ExecuteScalar());
 
                         if (result == 1)
@@ -77,7 +77,7 @@ namespace WindowsFormsApplication6
                     }
 
                     finally
-                    { Conn.Close(); }
+                    { SQLConnection.Connection.Close(); }
                 }
                 else
                 {
@@ -101,10 +101,10 @@ namespace WindowsFormsApplication6
 
             try
             {
-                Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
+               
                 string commString = ("Select ID, DepartmentName from Department");
 
-                SqlDataAdapter da = new SqlDataAdapter(commString, Conn);
+                SqlDataAdapter da = new SqlDataAdapter(commString, SQLConnection.Connection);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 

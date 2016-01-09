@@ -17,14 +17,13 @@ namespace WindowsFormsApplication6
         {
             InitializeComponent();
         }
-        SqlConnection Conn;
         private void btnConfirm_Click(object sender, EventArgs e)
         {
-            Conn = new SqlConnection(@"Data source = (localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
-            SqlCommand strComm = new SqlCommand("SELECT * FROM lendedBOOKS WHERE StudentID = @StdID AND BookID = @BkID AND IsReturnedBack = '0';", Conn);
-            strComm.Parameters.AddWithValue("@StdID", listBox1.SelectedIndex); 
+
+            SqlCommand strComm = new SqlCommand("SELECT * FROM lendedBOOKS WHERE StudentID = @StdID AND BookID = @BkID AND IsReturnedBack = '0';", SQLConnection.Connection);
+            strComm.Parameters.AddWithValue("@StdID", listBox1.SelectedIndex);
             strComm.Parameters.AddWithValue("@BkID", listBName.SelectedIndex);
-            Conn.Open();
+            strComm.Connection.Open();
             object obj = strComm.ExecuteScalar();
             if (obj == null)
             {
@@ -33,11 +32,11 @@ namespace WindowsFormsApplication6
                 {
                     try
                     {
-                        Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
+
                         string comString = "Select Quantity FROM BooksInfo WHERE bookISBN = @BISBN";
-                        SqlCommand com = new SqlCommand(comString, Conn);
+                        SqlCommand com = new SqlCommand(comString, SQLConnection.Connection);
                         com.Parameters.AddWithValue("@BISBN", label8.Text);
-                        Conn.Open();
+                        com.Connection.Open();
                         object WantToPassTheCourse = com.ExecuteScalar();
                         if (WantToPassTheCourse != null)
                         {
@@ -48,28 +47,29 @@ namespace WindowsFormsApplication6
                             }
                             else
                             {
-                                Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
-                                string commString = "INSERT INTO lendedBOOKS (StudentID, BookID, lendedDate, IsReturnedBack) VALUES (@SID,@BID ,@LDATE,0);";
-                                SqlCommand comm = new SqlCommand(commString, Conn);
-                                comm.Parameters.AddWithValue("@SID", listBox1.Text);
-                                comm.Parameters.AddWithValue("@BID", label8.Text);
+
+
+
+                                string commString = "RENT_BOOK";
+                                SqlCommand comm = new SqlCommand(commString, SQLConnection.Connection);
+                                comm.CommandType = CommandType.StoredProcedure;
+                                comm.Parameters.AddWithValue("@StudentID", listBox1.Text);
+                                comm.Parameters.AddWithValue("@BookID", label8.Text);
+                                comm.Parameters.AddWithValue("@DueDate", dtDueDate.Text);
                                 DateTime shisha = DateTime.Now;
                                 string zaString = shisha.ToString();
                                 comm.Parameters.AddWithValue("@LDATE", shisha);
-                                Conn.Open();
-                                int result = comm.ExecuteNonQuery();
-                                if (result != -1)
+                                comm.Connection.Open();
+                                int result = Convert.ToInt32(comm.ExecuteScalar());
+                                if (result == 1)
                                 {
-                                    string coString = @"UPDATE BooksInfo SET Quantity = Quantity-1 WHERE BookISBN=@BID";
-                                    SqlCommand co = new SqlCommand(coString, Conn);
-                                    co.Parameters.AddWithValue("@BID", label8.Text);
-                                    co.ExecuteNonQuery();
                                     MessageBox.Show("Book has been lent successfully.");
                                 }
                                 else
                                 {
-                                    MessageBox.Show("Check the form again.");
+                                    MessageBox.Show("3 books");
                                 }
+                                // tertemiz mis 
                             }
                         }
                     }
@@ -77,8 +77,9 @@ namespace WindowsFormsApplication6
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message);
+                        // MessageBox.Show("Error occured. Call us.");
                     }
-                    finally { Conn.Close(); }
+                    finally { SQLConnection.Connection.Close(); }
                 }
                 else
                 {
@@ -89,29 +90,26 @@ namespace WindowsFormsApplication6
             {
                 MessageBox.Show("The student cannot take the same book 2 times.");
             }
-            Conn.Close();
+            SQLConnection.Connection.Close();
         }
 
         private void listBName_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBName.SelectedIndex != -1) // prevents to get an error when clicking an empty area
+            if (listBName.SelectedIndex != -1) // prevents to get an error when clicking empty area
             {
                 Books b = (Books)listBName.SelectedItem;
                 label8.Text = b.ISBN.ToString();
                 label9.Text = b.Author.ToString();
                 label10.Text = b.PublishedYear.ToString();
-                
-
-
             }
         }
 
         private void Lending_Load(object sender, EventArgs e)
         {
-            Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
+
             string commString = "SELECT * FROM BooksInfo;";
-            SqlCommand comm = new SqlCommand(commString, Conn);
-            Conn.Open();
+            SqlCommand comm = new SqlCommand(commString, SQLConnection.Connection);
+            comm.Connection.Open();
             SqlDataReader listreader = comm.ExecuteReader();
             while (listreader.Read())
             {
@@ -121,11 +119,13 @@ namespace WindowsFormsApplication6
                 b.BookName = listreader.GetString(1);
                 b.Author = listreader.GetString(2);
                 b.PublishedYear = listreader.GetInt32(3);
-                
 
                 listBName.Items.Add(b);
             }
-            Conn.Close();
+            SQLConnection.Connection.Close();
+
+            dtDueDate.MinDate = DateTime.Now;
+            dtDueDate.MaxDate = DateTime.Now.AddDays(31);
         }
 
         private void btnReset_Click(object sender, EventArgs e)
@@ -136,23 +136,24 @@ namespace WindowsFormsApplication6
         private void btnMainMenu_Click(object sender, EventArgs e)
         {
             Form2 Form = new Form2();
+            this.Hide();
             Form.ShowDialog();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             listBox1.Items.Clear();
-            Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
-            SqlCommand com = new SqlCommand("Select StudentID from Members where StudentID like  @studentid", Conn);
+
+            SqlCommand com = new SqlCommand("Select StudentID from Members where StudentID like  @studentid", SQLConnection.Connection);
             com.Parameters.AddWithValue("@studentid", "%" + textBox1.Text + "%");
-            Conn.Open();
+            com.Connection.Open();
             SqlDataReader dr = com.ExecuteReader();
 
             while (dr.Read())
             {
                 listBox1.Items.Add(dr.GetInt32(0).ToString());
             }
-            Conn.Close();
+            SQLConnection.Connection.Close();
 
         }
 

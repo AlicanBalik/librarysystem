@@ -22,7 +22,6 @@ namespace WindowsFormsApplication6
         {
 
         }
-        SqlConnection Conn;
         private void EditBook_Load(object sender, EventArgs e)
         {
             for (int i = 0; i <= 10; i++)
@@ -33,10 +32,10 @@ namespace WindowsFormsApplication6
             {
                 cmbYear.Items.Add(i);
             }
-            Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
+
             string commString = "SELECT * FROM BooksInfo";
-            SqlCommand comm = new SqlCommand(commString, Conn);
-            Conn.Open();
+            SqlCommand comm = new SqlCommand(commString, SQLConnection.Connection);
+            comm.Connection.Open();
 
             SqlDataReader zaList = comm.ExecuteReader();
             while (zaList.Read())
@@ -54,10 +53,10 @@ namespace WindowsFormsApplication6
                 listBookID.Items.Add(b);
 
             }
-            Conn.Close();
+            SQLConnection.Connection.Close();
 
             string forCategory = "Select CategoryID, Description from Categories";
-            SqlDataAdapter adapter = new SqlDataAdapter(forCategory, Conn);
+            SqlDataAdapter adapter = new SqlDataAdapter(forCategory, SQLConnection.Connection);
             DataTable dtable = new DataTable();
             adapter.Fill(dtable);
 
@@ -67,7 +66,7 @@ namespace WindowsFormsApplication6
 
 
             string zaLanguage = "Select ID, Language from Language";
-            SqlDataAdapter da = new SqlDataAdapter(zaLanguage, Conn);
+            SqlDataAdapter da = new SqlDataAdapter(zaLanguage, SQLConnection.Connection);
             DataTable dt = new DataTable();
             da.Fill(dt);
 
@@ -99,6 +98,7 @@ namespace WindowsFormsApplication6
         private void btnMain_Click(object sender, EventArgs e)
         {
             Form2 obj = new Form2();
+            this.Hide();
             obj.ShowDialog();
         }
 
@@ -108,10 +108,10 @@ namespace WindowsFormsApplication6
             {
                 try
                 {
-                    Conn = new SqlConnection(@"Data Source = (localdb)\v11.0; Initial Catalog = Library System; Integrated security = true;");
+
                     string commString = @"UPDATE BooksInfo SET bookISBN=@ISBN, bookName=@Name, bookAuthor=@Author, PublishedYear=@Year, Language=@Language, CategoryID=@Category, Quantity=@Quantity WHERE bookISBN = @ListISBN";
-                    SqlCommand comm = new SqlCommand(commString, Conn);
-                    Conn.Open();
+                    SqlCommand comm = new SqlCommand(commString, SQLConnection.Connection);
+
                     comm.Parameters.AddWithValue("@ListISBN", listBookID.SelectedItem.ToString());
                     comm.Parameters.AddWithValue("@ISBN", txtISBN.Text);
                     comm.Parameters.AddWithValue("@Name", txtName.Text);
@@ -120,6 +120,7 @@ namespace WindowsFormsApplication6
                     comm.Parameters.AddWithValue("@Language", cmbLanguage.SelectedValue);
                     comm.Parameters.AddWithValue("@Category", cmbCategory.SelectedValue);
                     comm.Parameters.AddWithValue("@Quantity", cmbQuantity.Text);
+                    comm.Connection.Open();
                     int result = comm.ExecuteNonQuery();
                     if (result != -1)
                     {
@@ -137,7 +138,7 @@ namespace WindowsFormsApplication6
                 }
 
 
-                finally { Conn.Close(); }
+                finally { SQLConnection.Connection.Close(); }
             }
             else
             {
@@ -149,11 +150,12 @@ namespace WindowsFormsApplication6
         {
             if (txtISBN.Text != "" && txtName.Text != "" && txtAuthor.Text != "" && cmbYear.SelectedIndex != -1 && cmbLanguage.SelectedIndex != -1 && cmbCategory.SelectedIndex != -1)
             {
-                Conn = new SqlConnection(@"Data Source = (Localdb)\v11.0; Initial Catalog = Library System; Integrated Security = True;");
+                
                 string komut = "DELETE BooksInfo WHERE bookISBN = @ISBN";
-                SqlCommand ko = new SqlCommand(komut, Conn);
-                Conn.Open();
+                SqlCommand ko = new SqlCommand(komut, SQLConnection.Connection);
+                
                 ko.Parameters.AddWithValue("@ISBN", listBookID.Text);
+                ko.Connection.Open();
                 int result = ko.ExecuteNonQuery();
                 if (result != -1)
                 {
@@ -171,7 +173,7 @@ namespace WindowsFormsApplication6
                     MessageBox.Show("User cannot be deleted.");
                 }
 
-                Conn.Close();
+                SQLConnection.Connection.Close();
             }
             else
             {

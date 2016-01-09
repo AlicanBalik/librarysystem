@@ -22,17 +22,15 @@ namespace WindowsFormsApplication6
         {
             Application.Exit();
         }
-
-        SqlConnection Conn;
         private void btnLogin_Click(object sender, EventArgs e)
         { 
             try
             {
-                Conn = new SqlConnection(@"Data source = (localdb)\v11.0; Initial Catalog = Library System; Integrated Security = true;");
-                SqlCommand comm = new SqlCommand("SELECT Name FROM Admin WHERE Username = @username AND Password = @password;", Conn);
+
+                SqlCommand comm = new SqlCommand("SELECT Name FROM Admin WHERE Username = @username AND Password = @password;", SQLConnection.Connection);
                 comm.Parameters.AddWithValue("@username", txtLoginID.Text);
                 comm.Parameters.AddWithValue("@password", txtLoginPass.Text);
-                Conn.Open();
+                comm.Connection.Open();
                 object result = comm.ExecuteScalar();
                 // scalar select icin- nonquery tsql kodlari icin
                 if (result!=null) // checks value    
@@ -40,6 +38,7 @@ namespace WindowsFormsApplication6
                     // lf it has                                        
                     MessageBox.Show("Welcome " + result.ToString()); // tostring()  converts variable which comes as object to string
                     Form2 form2 = new Form2();
+                    this.Hide();
                     form2.ShowDialog();
                    
                 }
@@ -56,7 +55,7 @@ namespace WindowsFormsApplication6
                 MessageBox.Show(ex.Message);
             }
             finally {
-                Conn.Close();
+                SQLConnection.Connection.Close();
             }
         }
 

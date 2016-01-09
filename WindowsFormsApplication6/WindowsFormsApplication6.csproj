@@ -126,6 +126,7 @@
     <Compile Include="SearchSIDandShowBOOK.Designer.cs">
       <DependentUpon>SearchSIDandShowBOOK.cs</DependentUpon>
     </Compile>
+    <Compile Include="SQLConnection.cs" />
     <EmbeddedResource Include="AddBook.resx">
       <DependentUpon>AddBook.cs</DependentUpon>
     </EmbeddedResource>
